@@ -1,0 +1,2272 @@
+---
+title: "Code for Nalin and Yajima (2020)"
+author: "Giuliano Toshiro Yajima"
+date: "`r Sys.Date()`"
+output: html_document
+#print the document in pdf format, alternatively
+#output: pdf_document
+#always_allow_html: true
+#documentclass: report
+---
+To replicate the results of Nalin and Yajima (2020) (http://www.levyinstitute.org/publications/balance-sheet-effects-of-a-currency-devaluation-a-stock-flow-consistent-framework-for-mexico).
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+# Step 1: Install libraries to perform the simulations
+
+If not present, install the package "EviewsR", "sfcr" and "ggplot2":
+
+```{r}
+#install.packages("EviewsR")
+#install.packages("sfcr")
+#install.packages("ggplot2")
+#install.packages("gridExtra")
+#install.packages("tidyverse")
+
+library(EviewsR)
+library(sfcr)
+library(ggplot2)
+library(gridExtra)
+library(tidyverse)
+
+```
+
+
+# Step 2: The Model with "EviewsR"
+
+- "EviewsR" Simply launches the model from R in Eviews;
+- as such, the model in the chunk is basically the one that you can launch on Eviews.
+
+
+```{eviews EviewsR,eval=T,echo=T,comment=NULL,results='hide'}
+'This program is created in R Markdown with the help of EviewsR package
+  %path=@runpath
+  cd %path
+   'RER Model with Capital Gains on the RER and a simple function for the foreign bond demand
+'NOTE in the baseline no endogenous wages and profit margins
+' ****************************************************************************
+wfcreate(wf=RER, page=annual) a 1900 2100
+
+series Yus
+Yus.displayname USA Income 
+series Yla
+Yla.displayname LA Income
+series Vus
+Vus.displayname USA Wealth 
+series Vla
+Vla.displayname LA Wealth 
+series Vint
+
+series Tus
+Tus.displayname Taxes USA
+series Tla
+Tla.displayname Taxes LA
+series Gus
+Gus.displayname Government expenditure USA
+series Gla
+Gla.displayname Government expenditure LA
+series IMus
+IMus.displayname Imports USA
+series IMla
+IMla.displayname Imports LA
+series Xus
+Xus.displayname Exports USA
+series Xla
+Xla.displayname Exports LA
+
+series _IMus
+_IMus.displayname Imports volume USA
+series _IMla
+_IMla.displayname Imports volume LA
+series _Xus
+_Xus.displayname Exports volume USA
+series _Xla
+_Xla.displayname Exports volume LA
+
+series Cus
+Cus.displayname consumption USA
+series Cla
+Cla.displayname consumption LA
+series Bus_s
+Bus_s.displayname assets supply USA
+series Bus_d
+Bus_d.displayname assets demand USA
+series Bla_s
+Bla_s.displayname assets supply LA
+series Bla_d
+Bla_d.displayname assets demand LA
+series Busus_d
+Busus_d.displayname assets demand residents USA issued by USA 
+series Busla_d
+Busla_d.displayname assets demand residents USA issued by LA
+series Busla_s
+Busla_s.displayname assets supply residents USA issued by LA
+
+series Bbla_d
+series Bbla_s
+series Bblaus_d
+series Bblaus_s
+series Bbusla_d
+series Bbusla_s
+series CBA_d
+series CBA_s
+series DER_d
+series DER_s
+
+series Bbla_d
+series Bbla_s
+series Bbus_d
+series Bbus_s
+series Hbus_d
+series Hbus_s
+series Hbla_d
+series Hbla_s
+series Dus_s
+series Dla_s
+series Dus_d
+series Dla_d
+series Bclaus_s
+series Bcusla_s
+series Bclaus_d
+series Bcusla_d
+series Aus_d
+series Aus_s
+series Ala_d
+series Ala_s
+
+series Hus_d
+Hus_d.displayname money demand USA
+series Blala_d
+Blala_d.displayname assets demand residents LA issued by LA 
+series Blaus_d
+Blaus_d.displayname assets demand residents LA issued by USA
+series Blaus_s
+Blaus_s.displayname assets supply residents LA issued by USA
+series Hla_d
+Hla_d.displayname money demand LA
+series Hla_s
+Hla_s.displayname money supply LA
+series Hus_s
+Hus_s.displayname money supply USA
+series Busus_s
+Busus_s.displayname assets supply residents USA issued by USA 
+series Blala_s
+Blala_s.displayname assets supply residents LA issued by LA
+series Bcbus_s
+Bcbus_s.displayname assets supply USA to CB
+series Bcbla_s
+Bcbla_s.displayname assets supply LA to CB
+series Bcbus_d
+Bcbus_d.displayname assets demand USA of CB
+series Bcbla_d
+Bcbla_d.displayname assets demand LA of CB
+series xrus
+xrus.displayname US exchange rate
+series xrla
+xrla.displayname LA exchange rate
+series rus
+rus.displayname interest rate on US bills
+series rla
+rla.displayname interest rate on LA bills
+series rdus
+series rdla
+series rcusla
+series rclaus
+series rCBA
+series pCBA
+series rder
+series pder
+
+series CGcus
+series CGcla
+series CGbus
+series CGbla
+series CGus
+CGus.displayname US Capital gains 
+series CGla
+CGla.displayname LA Capital gains
+series Bcblaus_s
+Bcblaus_s.displayname Riserve estere LA
+
+series CABla
+CABla.displayname Current Account LA
+series CABus
+CABus.displayname Current Account USA
+series KABla
+KABla.displayname Capital Account LA
+series KABus
+KABus.displayname Capital Account USA
+
+series Pla
+Pla.displayname Domestic price  LA
+series Pus
+Pus.displayname Domestic price USA
+series Pmla
+Pmla.displayname Import Price LA
+series Pmus
+Pmus.displayname Import Price USA
+series Pxla
+Pxla.displayname Export Price LA
+series Pxus
+Pxus.displayname Export Price USA
+
+series _Gla
+series _Gus
+series _YDla
+series _YDus
+series YDla
+series YDus
+series _Vus
+series _Vla
+series _Cla
+series _Cus
+series _YDlae
+series _YDuse
+series _Sla
+series _Sus
+series Sla
+series Sus
+series Slae
+series Suse
+series _PlaS
+series _PusS
+series _plads
+series _pusds
+series Sla
+series Sus
+series DSla
+series DSus
+series _DSla
+series _DSus
+series phila
+series phius
+series PlaS
+series PusS
+series _PusY
+series _PlaY
+series _prus
+series _prla
+series _pdsus
+series _pdsla
+series Pdsus
+series Pdsla
+series Wus
+series Wla
+series Nla
+series Nus
+series Nla_t
+series Nus_t
+series etanla
+series etanus
+
+series dxruse
+series dxrlae
+series xrlae
+series xruse
+series Fla
+series Fus
+series Fdla
+series Fdus
+series Fula
+series Fuus
+series Fbla
+series Fbus
+series Fcbla
+series Fcbus
+series vbla
+series vbus
+
+series _Yla
+_Yla.displayname LA Real Output
+series _Yus
+_Yus.displayname US Real Output
+series Bcblaus_d
+series psbrus
+series psbrla
+series YDus_hs
+series YDla_hs
+
+'parametri
+series thetaus
+thetaus.displayname marginal tax rate USA
+series thetala
+thetala.displayname marginal tax rate LA
+series thetabus
+thetaus.displayname marginal tax rate K USA
+series thetabla
+thetala.displayname marginal tax rate K LA
+series alpha_1us
+alpha_1us.displayname marginal propensity to consume out of income USA
+series alpha_2us
+alpha_2us.displayname marginal propensity to consume out of wealth USA
+series alpha_1la
+alpha_1la.displayname marginal propensity to consume out of income LA
+series alpha_2la
+alpha_2la.displayname marginal propensity to consume out of wealth LA
+series lambda_10us
+lambda_10us.displayname autonomous demand of assets of residents USA issued by USA
+series lambda_11us
+lambda_11us.displayname parameter 11 USA
+series lambda_12us
+lambda_12us.displayname parameter 12 USA
+series lambda_13us
+lambda_13us.displayname parameter 13 USA
+series lambda_14us
+lambda_14us.displayname parameter 14 USA
+series lambda_20us
+lambda_20us.displayname autonomous demand of assets of residents USA issued by LA
+series lambda_21us
+lambda_21us.displayname parameter 21 USA
+series lambda_22us
+lambda_22us.displayname parameter 22 USA
+series lambda_23us
+lambda_23us.displayname parameter 23 USA
+series lambda_24us
+lambda_24us.displayname parameter 24 USA
+series lambda_30us
+lambda_30us.displayname autonomous demand of money residents USA 
+series lambda_31us
+lambda_31us.displayname parameter 31 USA
+series lambda_32us
+lambda_32us.displayname parameter 32 USA
+series lambda_33us
+lambda_33us.displayname parameter 33 USA
+series lambda_34us
+lambda_34us.displayname parameter 34 USA
+series lambda_40us
+lambda_40us.displayname autonomous demand of money residents USA 
+series lambda_41us
+lambda_41us.displayname parameter 41 USA
+series lambda_42us
+lambda_42us.displayname parameter 42 USA
+series lambda_43us
+lambda_43us.displayname parameter 43 USA
+series lambda_44us
+lambda_44us.displayname parameter 44 USA
+series lambda_50us
+lambda_50us.displayname autonomous demand of money residents USA 
+series lambda_51us
+lambda_51us.displayname parameter 51 USA
+series lambda_52us
+lambda_52us.displayname parameter 52 USA
+series lambda_53us
+lambda_53us.displayname parameter 53 USA
+series lambda_54us
+lambda_54us.displayname parameter 54 USA
+series lambda_10la
+lambda_10la.displayname autonomous demand of assets of residents LA issued by LA
+series lambda_11la
+lambda_11la.displayname parameter 11 LA
+series lambda_12la
+lambda_12la.displayname parameter 12 LA
+series lambda_13la
+lambda_13la.displayname parameter 13 LA
+series lambda_14la
+lambda_14la.displayname parameter 14 LA
+series lambda_20la
+lambda_20la.displayname autonomous demand of assets of residents LA issued by USA
+series lambda_21la
+lambda_21la.displayname parameter 21 LA
+series lambda_22la
+lambda_22la.displayname parameter 22 LA
+series lambda_23la
+lambda_23la.displayname parameter 23 LA
+series lambda_24la
+lambda_24la.displayname parameter 24 LA
+series lambda_30la
+lambda_30la.displayname autonomous demand of money residents LA 
+series lambda_31la
+lambda_31la.displayname parameter 31 LA
+series lambda_32la
+lambda_32la.displayname parameter 32 LA
+series lambda_33la
+lambda_33la.displayname parameter 33 LA
+series lambda_34la
+lambda_34la.displayname parameter 34 LA
+series lambda_40la
+lambda_40la.displayname autonomous demand of money residents LA 
+series lambda_41la
+lambda_41la.displayname parameter 41 LA
+series lambda_42la
+lambda_42la.displayname parameter 42 LA
+series lambda_43la
+lambda_43la.displayname parameter 43 LA
+series lambda_44la
+lambda_44la.displayname parameter 44 LA
+series lambda_50la
+lambda_50la.displayname autonomous demand of money residents LA 
+series lambda_51la
+lambda_51la.displayname parameter 51 LA
+series lambda_52la
+lambda_52la.displayname parameter 52 LA
+series lambda_53la
+lambda_53la.displayname parameter 53 LA
+series lambda_54la
+lambda_54la.displayname parameter 54 LA
+
+series lambda_60us
+series lambda_61us
+series lambda_62us
+series lambda_70us
+series lambda_71us
+series lambda_72us
+series lambda_60la
+series lambda_61la
+series lambda_62la
+series lambda_70la
+series lambda_71la
+series lambda_72la
+
+series rho_0us
+series rho_1us
+series rho_2us
+series rho_3us
+series rho_0la
+series rho_1la
+series rho_2la
+series rho_3la
+series rho_0int
+series rho_1int
+series rho_2int
+
+series deltala
+series gammala
+series gamma0la
+series kappala
+series kla
+series kla_t
+series ila_d
+series ila_s
+series dala
+series deltaus
+series gammaus
+series gamma0us
+series kappaus
+series kus
+series kus_t
+series ius_d
+series ius_s
+series daus
+series inflwla
+series  thetapla
+series inflphila
+series thetaphila
+series inflla
+series inflwus
+series  thetapus
+series inflphius
+series thetaphius
+series influs
+series omega0la
+series omega0us
+series phi0la
+series phi0us
+
+series e_la
+e_la.displayname autonomous demand of Exports LA
+series eta_la
+eta_la.displayname price elasticity of Exports LA
+series epsilon_la
+epsilon_la.displayname income elasticity of Exports LA
+series chi_0la
+chi_0la.displayname shock to Export price LA
+series chi_1la
+chi_1la.displayname price elasticity of export prices LA
+
+series p_la
+p_la.displayname autonomous demand of Imports LA
+series psi_la
+psi_la.displayname  price elasticity of Imports LA
+series pi_la
+pi_la.displayname income elasticity of Imports LA
+series mi_0la
+mi_0la.displayname shock to Import price LA
+series mi_1la
+mi_1la.displayname price elasticity of import prices LA
+
+
+'valori parametri
+
+smpl @all
+
+alpha_1la = 0.9
+alpha_1us = 0.6
+alpha_2la = 0.053333276
+alpha_2us = 0.213326723889398
+
+'vertical and horizontal constraints respected
+lambda_10la = 0.4
+lambda_11la = 0.5
+lambda_12la = 0.5
+lambda_13la= 0.25
+lambda_14la= 0.25
+lambda_20la = 0.3
+lambda_21la = 0.5
+lambda_22la = 0.5
+lambda_23la= 0.5
+lambda_40la = 0.4
+lambda_41la = 0.25
+lambda_42la = 5
+lambda_43la= 0.5
+lambda_44la= 0.25
+lambda_50la = 0.1
+lambda_51la = 0.25
+lambda_52la = 5
+lambda_53la= 0.25
+lambda_54la= 0.5
+'vertical and horizontal constraints respected
+lambda_24la= 5
+lambda_30la = 0.25
+lambda_31la = 5
+lambda_32la = 5
+lambda_33la= 5
+lambda_34la= 5
+'vertical and horizontal constraints respected
+lambda_10us = 0.4
+lambda_11us = 0.5
+lambda_12us = 0.5
+lambda_13us= 0.25
+lambda_14us= 0.25
+lambda_20us = 0.3
+lambda_21us = 0.5
+lambda_22us = 0.5
+lambda_23us= 0.5
+lambda_40us = 0.4
+lambda_41us = 0.25
+lambda_42us = 5
+lambda_43us= 0.5
+lambda_44us= 0.25
+lambda_50us = 0.1
+lambda_51us = 0.25
+lambda_52us = 5
+lambda_53us= 0.25
+lambda_54us= 0.5
+'vertical and horizontal constraints respected
+lambda_24us= 5
+lambda_30us = 0.25
+lambda_31us = 5
+lambda_32us = 5
+lambda_33us= 5
+lambda_34us= 5
+'vertical and horizontal constraints respected
+lambda_60us=0.5
+lambda_61us=0.5
+lambda_62us=0.5
+lambda_70us=0.5
+lambda_71us=0.5
+lambda_72us=0.5
+lambda_60la=0.5
+lambda_61la=0.5
+lambda_62la=0.5
+lambda_70la=0.5
+lambda_71la=0.5
+lambda_72la=0.5
+'vertical and horizontal constraints respected
+e_la = - 1.18
+eta_la = 0.7
+epsilon_la = 0.8'controllare
+p_la = - 3.015
+psi_la = 0.7
+pi_la =  1.2'controllare
+mi_0la = - 0.00001
+chi_0la = - 0.00001
+mi_1la = 0.6 '0.7original GL parameters
+chi_1la = 0.55'0.5original GL parameters
+phila = 0.2381
+phius = 0.2381
+thetala = 0.2
+thetaus = 0.2
+thetabla = 0
+thetabus = 0
+rho_0us=0.03
+rho_1us=0.9
+rho_2us=2.7'0.7
+rho_3us=0.03
+rho_0la=0.03
+rho_1la=0.9
+rho_2la=2.7'0.7
+rho_3la=0.03
+rho_0int=0.9
+rho_1int=0.9
+rho_2int=0.9
+
+deltala = 0.216
+gammala = 1
+gamma0la = 0
+kappala = 1
+
+deltaus = 0.216
+gammaus = 1
+gamma0us = 0
+kappaus = 1
+
+' Exogenous variables
+Bcblaus_s = 0
+
+dxruse = 0
+_gla = 16
+_gus = 16
+
+_prla = 0.8
+_prus = 1.3333
+rla = 0.03
+rus = 0.03
+rdus=0.01
+rdla=0.01
+rcusla=0.0315
+rclaus=0.0315
+rCBA=0.16
+pCBA= 6.25
+rder=0.16
+pder= 6.25
+wla = 0.6
+wus = 1
+inflwla = 0
+thetapla = 0
+inflla = 0
+inflwus = 0
+thetapus = 0
+influs = 0
+omega0la=0
+omega0us=0
+inflphius=0
+thetaphius=0
+inflphila=0
+thetaphila=0
+phi0la=0
+phi0us=0
+etanla=1
+etanus=1
+
+' Starting values for stocks
+Bcblaus_d = 0
+Bla_s = 145.954295
+Blala_d = 102.18
+Blala_s = 102.18
+Bbus_d = 12.250255
+Bbus_s = 12.250255
+Bus_s = 146.005715
+
+Busus_d = 102.19
+Busus_s = 102.19
+Bcbla_d = 17.27839
+Bcbla_s = 17.27839
+Bcbus_d = 17.2995
+Bcbus_s = 17.2995
+Hla_d = 7.2987
+Hla_s = 7.2987
+Hus_d = 7.2995
+Hus_s = 7.2995
+Bblaus_d = 12.24565
+Bblaus_s = 12.24565
+Bbusla_d = 12.250255
+Bbusla_s = 12.250255
+CBA_d = 3.9178
+CBA_s = 3.9178
+DER_d =3.9178
+DER_s = 3.9178
+Aus_d=0
+Aus_s=0
+Ala_d=0
+Ala_s=0
+Bbla_d = 12.24565
+Bbla_s = 12.24565
+Hbus_d=10
+Hbus_s=10
+Hbla_d=10
+Hbla_s=10
+Dus_s=12.01426
+Dla_s=12.01426
+Dus_d=12.01426
+Dla_d=12.01426
+ila_d=20
+ila_s=0.2
+ius_d=20
+ius_s=0.2
+
+kla_t = 91
+kus_t = 91
+Bcusla_d=2.5
+Bcusla_s=2.5
+kla = 91
+dala=20
+Bclaus_d=2.5
+Bclaus_s=2.5
+kus = 91
+daus=20
+
+_Vla = 152.62
+_Vus = 152.63
+vla = 145.97921
+vus = 145.99001
+vbla=0
+vbus=0
+
+' Other endogenous
+_Cla = 81.393
+_Cus = 81.401
+cabla = 0
+cabus = 0
+Cla = 77.851
+Cus = 77.86
+_DSla = 97.393
+_DSus = 97.401
+DSla = 93.154
+DSus = 93.164
+dxrlae = 0
+fcbla = 0.00869
+fcbus = 0.00895
+fbus=0.6
+fbla=0.8
+fla=0
+fus=0
+fdla=9.5
+fdus=9.5
+fula=9.5
+fuus=9.5
+gla = 15.304
+gus = 15.304
+_imla = 11.928
+_imus = 11.926
+imla = 11.407
+imus = 11.409
+kabla = 0.00002
+kabus = - 0.00002
+nla = 73.046
+nus = 73.054
+nla_t = 73.046
+nus_t = 73.054
+_pdsus = 0.95648
+_pdsla = 0.95649
+
+pmla = 0.95628
+pmus = 0.95661
+_plas = 0.95646
+_puss = 0.9565
+pxla = 0.95634
+pxus = 0.95656
+_play = 0.95648
+_pusy = 0.95649
+_sla = 109.32
+_sus = 109.33
+sla = 104.56
+sus = 104.57
+slae = 104.56
+suse = 104.57
+tla = 19.463
+tus = 19.465
+_xla = 11.926
+_xus = 11.928
+xla = 11.406
+xus = 11.41
+xrla = 1.0003
+xrus = 0.99971
+xrlae = 1.0003
+xruse = 0.99971
+_yla = 97.392
+_yus = 97.403
+yla = 93.154
+yus = 93.164
+ydla = 77.851
+ydus = 77.86
+_ydla = 81.394
+_ydus = 81.402
+_ydlae = 81.394
+_yduse = 81.402
+
+'Model creation
+
+model RER_mod
+
+'(1) ARTERIAL FLOWS
+
+'Income
+'RER_mod.append Yus= Cus+ Gus +Xus- IMus
+'RER_mod.append Yla = Cla+ Gla+ Xla -IMla
+'disposable income
+RER_mod.append YDus=(Yus +Fbus+rus(-1)*Busus_d(-1)+ rdus(-1)*Dus_d(-1) +CBA_d(-1)+CGus+CGbus+CGcus)*(1-thetaus)
+RER_mod.append YDla=(Yla+ Fbla + rla(-1)*Blala_d(-1) + rdla(-1)*Dla_d(-1)+DER_d(-1)+CGla+CGbla+CGcla)*(1-thetala) 
+'disposable income (HS)
+'RER_mod.append YDus_hs=YDus+ d(xrla)*Busla_s(-1)
+'RER_mod.append YDla_hs=YDla+ d(xrus)*Blaus_s(-1)
+'Wealth
+RER_mod.append d(Vus)=YDus-Cus
+RER_mod.append d(Vla)=YDla-Cla
+'Capital Gains
+RER_mod.append CGus= d(pCBA)*CBA_s(-1)
+RER_mod.append CGla= d(pder)*DER_s(-1)
+'Tax
+RER_mod.append Tla = thetala*(Yla+Fbla+rla(-1)*Blala_d(-1)+ rdla(-1)*Dla_d(-1)+DER_d(-1))'  + thetabla*Bbusla_d
+RER_mod.append Tus = thetaus*(Yus +Fbus+rus(-1)*Busus_d(-1)+rdus(-1)*Dus_d(-1) + CBA_d(-1)) '+ thetabus*Bblaus_d
+'CB profits
+RER_mod.append Fcbla = rla(-1)*Bcbla_d(-1) + rus(-1)*Bcblaus_s(-1)*xrus
+RER_mod.append Fcbus = rus(-1)*Bcbus_d(-1) 
+'government budget constraint
+RER_mod.append d(Bla_s) = Gla-Tla+ rla(-1)*Bla_s(-1) - Fcbla +CGbus
+RER_mod.append d(Bus_s) = Gus-Tus+ rus(-1)*Bus_s(-1) - Fcbus+CGbla 
+'Current and Capital Account
+RER_mod.append CABla=Xla - IMla - rla(-1)*Bbusla_s(-1) + rus(-1)*Bblaus_s(-1)*xrus - rcusla(-1)*Bcusla_s(-1) + rclaus(-1)*Bclaus_s(-1)*xrus + rus(-1)*Bcblaus_s(-1)*xrus ' + rus(-1)*Blaus_s(-1)*xrus
+RER_mod.append KABla = d(Bbusla_s)- d(Bblaus_s)*xrus + d(Bcusla_s)- d(Bclaus_s)*xrus - d(Bcblaus_s)*xrus 
+RER_mod.append CABus=Xus - IMus + rla(-1)*Bbusla_s(-1)*xrla - rus(-1)*Bblaus_s(-1) + rcusla(-1)*Bcusla_s(-1)*xrla - rclaus(-1)*Bclaus_s(-1) - rus(-1)*Bcblaus_s(-1)'- rus(-1)*Blaus_s(-1)
+'RER_mod.append KABus = -d(Bbla_s)*xrla + d(Blaus_s) + d(Bcblaus_s)
+
+'(2) TRADE
+
+'Export and Import
+RER_mod.append Pmla= exp(mi_0la+  mi_1la *log(_pusy)  + (1- mi_1la)*log(_play) - mi_1la *log(xrla))
+RER_mod.append Pxla =exp(chi_0la+  chi_1la *log(_pusy)  + (1- chi_1la)*log(_play)- chi_1la *log(xrla))
+
+RER_mod.append Pxus = Pmla*xrla  
+RER_mod.append Pmus = Pxla*xrla
+
+RER_mod.append  _Xla= exp(e_la - eta_la *log(Pmus/_pusy) + epsilon_la*log(_Yus))
+RER_mod.append _IMla = exp(p_la - psi_la *log(Pmla(-1)/_play(-1)) + pi_la*log(_Yla))
+
+'RER_mod.append mi_1la=  ((log(_Pdsla)-mi_0la -log(_play))/(-log(_play) - log(xrla)+log(_pusy)))
+'RER_mod.append chi_1la = ((log(_Pdsus)-chi_0la-log(_play))/(-log(_play)- log(xrla)+log(_pusy)))
+
+RER_mod.append _Xus  =_IMla
+RER_mod.append  _IMus=_Xla
+RER_mod.append Xla = _Xla*Pxla
+RER_mod.append Xus = _Xus*Pxus 
+RER_mod.append IMla = _IMla*Pmla   
+RER_mod.append IMus = _IMus*Pmus
+
+'(3) INCOME AND EXPENDITURE
+
+'real disposable income is of the Haig-simon type
+RER_mod.append _Vla = Vla/_pdsla 
+RER_mod.append _Vus= Vus/_pdsus
+
+RER_mod.append _YDla = YDla/_pdsla - _Vla(-1)* d(_pdsla)/_pdsla 
+RER_mod.append _YDus =YDus/_pdsus - _Vus(-1)* d(_pdsus)/_pdsus 
+ 
+RER_mod.append _Cla = alpha_1la*_YDlae + alpha_2la*_Vla(-1)
+RER_mod.append _Cus =alpha_1us*_YDuse + alpha_2us*_Vus(-1)
+
+RER_mod.append _YDlae= (_YDla + _YDla(-1))/2
+RER_mod.append _YDuse= (_YDus + _YDus(-1))/2
+
+'RER_mod.append slae= (sla(-1))
+'RER_mod.append suse= (sus(-1))
+
+RER_mod.append _Sla =_Cla+_Gla+_Xla 
+RER_mod.append _Sus =_Cus+_Gus+_Xus 
+
+RER_mod.append Sla =_Sla*_PlaS
+RER_mod.append Sus =_Sus*_PusS
+
+RER_mod.append _PlaS =((1+phila)*(Wla*Nla+IMla+rcusla(-1)*Bcusla_s(-1)*xrla)) /_Sla
+RER_mod.append _PusS =((1+phius)*(Wus*Nus+IMus+rclaus(-1)*Bclaus_s(-1)*xrus)) / _Sus
+
+'RER_mod.append phila=(slae/(Wla*Nla)-1)
+'RER_mod.append phius=(suse/(Wus*Nus)-1)
+
+RER_mod.append _pdsla =(Sla-Xla) / (_Sla-_Xla)
+RER_mod.append _pdsus =(Sus-Xus) / (_Sus-_Xus)
+
+RER_mod.append DSla =Sla-Xla 
+RER_mod.append DSus =Sus-Xus 
+
+RER_mod.append _DSla =_cla+_gla 
+RER_mod.append _dsus =_cus+_gus  
+RER_mod.append Yla=Sla-IMla
+RER_mod.append Yus =Sus-IMus
+RER_mod.append _yla =_sla-_imla 
+RER_mod.append _yus =_sus-_imus 
+RER_mod.append _play = Yla /_yla 
+RER_mod.append _pusy =Yus/ _yus
+
+RER_mod.append Cla =_Cla*_pdsla 
+RER_mod.append Cus =_Cus*_pdsus  
+
+RER_mod.append Gla =_Gla*_pdsla 
+RER_mod.append Gus =_Gus*_pdsus 
+ 
+RER_mod.append nla_t = _yla/ _prla  
+RER_mod.append nus_t = _yus/ _prus 
+
+'(4) FINANCIAL INTERMEDIARIES
+
+'US Financial sector
+RER_mod.append Bbus_d=Dus_s-Bbusla_d-Hbus_d-Bcusla_d+PCBA*CBA_s+Aus_d'+Vbus'-Lus_s
+'RER_mod.append d(Vbus)=Fbus+CGbus+CGcus
+RER_mod.append Bbusla_d=rho_2us*CBA_s'*(1-thetabla)
+RER_mod.append Hbus_d=rho_0us*Dus_s
+RER_mod.append d(rdus)=rho_1us*d(rus)
+RER_mod.append CGbus=d(xrla)*Bbusla_s(-1)
+RER_mod.append CGcus=Bcusla_s(-1)*d(xrla)
+RER_mod.append PCBA=(1/rCBA)+log(Pxla*xrla)
+'RER_mod.append d(rRER)=rho_0int*
+RER_mod.append rcusla=(rho_3us+1)*rus
+RER_mod.append Fbus=rus(-1)*Bbus_s(-1)-rdus*Dus_s(-1)+rla(-1)*Bbusla_s(-1)*xrla -CBA_s(-1)+rcusla(-1)*Bcusla_s(-1)*xrla'+CGbus
+
+'LA Financial sector
+RER_mod.append Bbla_d=Dla_s-Bblaus_d-Hbla_d-Bclaus_d+Pder*DER_s+Ala_d'+Vbla'-Lla_s
+'RER_mod.append d(Vbla)=Fbla+CGbla+CGcla
+RER_mod.append Bblaus_d=rho_2la*DER_s'*(1-thetabus)
+RER_mod.append Hbla_d=rho_0la*Dla_s
+RER_mod.append d(rdla)=rho_1la*d(rla)
+RER_mod.append CGbla=d(xrus)*Bblaus_s(-1)
+RER_mod.append CGcla=Bclaus_s(-1)*d(xrus)
+RER_mod.append Pder=1/rder
+'RER_mod.append d(rder)=-rho_2int*(rla-rus)
+RER_mod.append rclaus=(rho_3la+1)*rla
+RER_mod.append Fbla=rla(-1)*Bbla_s(-1)-rdla*Dla_s(-1)+rus(-1)*Bblaus_s(-1)*xrus-DER_s(-1)+rclaus(-1)*Bclaus_s(-1)*xrus'+CGbla
+
+'Intermediaries
+'RER_mod.append d(Vint)=rus(-1)*Bintus_d(-1)+rla(-1)*Bintla_d(-1)*xrla +CGint-rRER(-1)*RER_d(-1)
+'RER_mod.append RER_s=RER_d
+'RER_mod.append CGint=d(xrla)*Bintla_s(-1)
+'RER_mod.append PRER=1/rRER
+'RER_mod.append d(rRER)=rho_0int*d(Pxla)-rho_1int*(rla-rus)
+'RER_mod.append Fint=rus(-1)*Bintus_d(-1)+rla(-1)*Bintla_d(-1)*xrla +CGint-rRER(-1)*RER_d(-1)
+'RER_mod.append Bintla_d=RER_s-Bintus_d
+
+
+
+'(5) ACCUMULATION
+
+'US
+' Wage bill
+RER_mod.append  Fus= Yus-Wus*Nus-rclaus(-1)*Bclaus_s(-1)*xrus -daus - CGcla
+
+RER_mod.append influs = _Pusy/_Pusy(-1)-1
+
+RER_mod.append  wus = omega0us + wus(-1)*(1+inflwus)
+
+RER_mod.append  inflwus =  thetapus*(influs(-1))
+
+RER_mod.append  phius = phi0us + phius(-1)*(1+inflphius)
+
+RER_mod.append  inflphius =  thetaphius*(influs(-1))
+
+RER_mod.append nus = nus(-1) + etanus*(nus_t - nus(-1))
+
+'RER_mod.append  thetapus=nus/nus_t
+
+'RER_mod.append  Fdus=rho_1int*Fus(-1)
+
+'RER_mod.append  Fuus=Fus-Fdus
+
+' Demand for bank loans
+RER_mod.append Bclaus_s=Bclaus_s(-1)+  ius_d - daus-Fus+CGcla
+
+' Accumuustion of capital
+RER_mod.append kus = kus(-1) + ius_d - daus
+
+' Depreciation allowances
+RER_mod.append daus = deltaus*kus(-1)
+
+' Capital stock target 
+RER_mod.append kus_t = kappaus*yus(-1)
+
+' Demand for investment goods
+RER_mod.append ius_d = gamma0us +  gammaus*(kus_t - kus(-1)) + daus '+Fus 'gamma0us+
+
+'LA
+' Wage bill
+RER_mod.append Fla = Yla -Wla*Nla - rcusla(-1)*Bcusla_s(-1)*xrla-dala -CGcus
+
+RER_mod.append inflla = _Play/_Play(-1)-1
+
+RER_mod.append wla = omega0la + wla(-1)*(1+inflwla)
+
+RER_mod.append inflwla =  thetapla*(inflla(-1))
+
+RER_mod.append phila = phi0la + phila(-1)*(1+inflphila)
+
+RER_mod.append inflphila =  thetaphila*(inflla(-1))
+
+RER_mod.append nla = nla(-1) + etanla*(nla_t - nla(-1))
+
+'RER_mod.append  thetapla=nla/nla_t
+
+'RER_mod.append  Fdla=rho_0int*Fla(-1)
+
+'RER_mod.append  Fula=Fla-Fdla
+
+' Demand for bank loans
+RER_mod.append Bcusla_s= Bcusla_s(-1) +  ila_d-dala -Fla+CGcus
+
+' Accumulation of capital
+RER_mod.append kla = kla(-1) + ila_d - dala
+ 
+' Depreciation allowances
+RER_mod.append dala = deltala*kla(-1)
+
+' Capital stock target 
+RER_mod.append kla_t = kappala*yla(-1)
+
+' Demand for investment goods
+RER_mod.append ila_d = gamma0la + gammala*(kla_t - kla(-1)) + dala '+Fla 'gamma0la + 
+
+
+
+
+
+'(5) ASSETS DEMAND
+
+'Asset demand for la resident
+RER_mod.append Blala_d=Vla*(lambda_10la+lambda_11la*rla-lambda_13la*rdla-lambda_14la*(rder+dPder))'-lambda_12la*(rus+dxruse))
+RER_mod.append Dla_d=Vla*(lambda_40la-lambda_41la*rla+lambda_43la*rdla-lambda_44la*(rder+dPder))'-lambda_42la*(rus+dxruse))
+RER_mod.append DER_d*Pder=Vla*(lambda_50la-lambda_51la*rla-lambda_53la*rdla+lambda_54la*(rder+dPder))
+'RER_mod.append Blaus_d=Vla*(lambda_20la-lambda_21la*rla-lambda_23la*rdla+lambda_22la*(rus+dxruse))
+'RER_mod.append Hla_d/ Vla=lambda_30la - lambda_31la*(rus+dxruse) -lambda_32la*rla
+
+
+'Asset demand for us resident
+RER_mod.append Busus_d=Vus*(lambda_10us +lambda_11us*rus-lambda_13us*rdus-lambda_14us*(rCBA+dPCBA))'-lambda_12us*(rla+dxrlae))
+RER_mod.append Dus_d=Vus*(lambda_40us-lambda_41us*rus+lambda_43us*rdus-lambda_44us*(rCBA+dPCBA))'-lambda_42us*(rla+dxrlae))
+RER_mod.append CBA_d*PCBA=Vus*(lambda_50us-lambda_51us*rus-lambda_53us*rdus+lambda_54us*(rCBA+dPCBA))
+'RER_mod.append Busla_d=Vus*(lambda_20us -lambda_21us*rus+lambda_22us*(rla+dxrlae))
+'RER_mod.append Hus_d/ Vus=lambda_30us -lambda_31us*rus -lambda_32us* (rla+dxrlae)
+
+'Asset demand for intermediaries
+'RER_mod.append Bintus_d=Vint*(lambda_10int + lambda_11int*rus - lambda_12int*(rla+dxrlae))
+'RER_mod.append Bintla_d=Vint*(lambda_20int - lambda_21int*rus + lambda_22int*(rla+dxrlae))
+
+'expected change in the exchange rate (expectations to update)
+RER_mod.append dPCBA=d(PCBA)/ PCBA
+RER_mod.append dPder=d(Pder)/ Pder
+
+
+'(6) ASSETS SUPPLY
+
+'Demand for cash
+RER_mod.append Hus_d= Vus - Busus_d- Dus_d- pCBA*CBA_d 
+RER_mod.append Hla_d= Vla - Blala_d-Dla_d -pder*DER_d
+'CB demand for B, H; D and RER
+RER_mod.append Hus_s= Hus_d
+RER_mod.append Hla_s= Hla_d
+RER_mod.append Dus_s=Dus_d
+RER_mod.append Dla_s=Dla_d
+RER_mod.append Busus_s= Busus_d
+RER_mod.append Blala_s =Blala_d
+RER_mod.append CBA_s=CBA_d
+RER_mod.append DER_s=DER_d
+RER_mod.append Bbus_s= Bbus_d
+RER_mod.append Bbla_s =Bbla_d
+RER_mod.append Aus_s =Aus_d
+RER_mod.append Ala_s =Ala_d
+'RER_mod.append Bintus_s=Bintus_d
+'RER_mod.append Lus_s=Lus_d
+'RER_mod.append ius_s=ius_d
+RER_mod.append Bclaus_d=Bclaus_s*xrus
+'RER_mod.append ila_s=ila_d
+RER_mod.append Bcusla_d=Bcusla_s*xrla
+RER_mod.append Hbus_s=Hbus_d
+RER_mod.append Hbla_s=Hbla_d
+'Supply of domestic T bills to CB
+RER_mod.append Bcbus_s= Bcbus_d
+
+RER_mod.append Bcbla_s= Bcbla_d 'Bla_s-Blala_s-Busla_s
+
+
+RER_mod.append d(Bcbus_d)=d(Hus_s)+d(Hbus_s)-d(Aus_s)
+RER_mod.append d(Bcbla_d)=d(Hla_s)+d(Hbla_s)-d(Ala_s)-d(Bcblaus_s)*xrus
+'supply of assets abroad 
+'RER_mod.append Busla_s= Bla_s- Blala_s- Bcbla_s
+'Exchange rate
+'RER_mod.append xrus= Blaus_d /Blaus_s
+RER_mod.append xrla= 1/xrus
+RER_mod.append Bblaus_s=Bblaus_d*xrla
+RER_mod.append Bcblaus_d=Bcblaus_s*xrus
+RER_mod.append xrus= (Bbusla_s)/(Bbusla_d) 
+RER_mod.append Bbusla_s= Bla_s - Blala_s- Bcbla_s -  Bbla_s
+'Final equation (not possible to appear twice)
+'RER_mod.append Blaus_s= Blaus_d /xrus
+
+smpl 1960 @last
+
+RER_mod.scenario Baseline
+
+RER_mod.solve(i=p)
+
+
+
+'EXPORT SHOCK + INTEREST SHOCK
+smpl @all
+
+' Store original value of shocked value to baseline
+genr rus_0 = rus
+genr e_la_0 = e_la
+
+smpl 2003 2014
+
+e_la = - 1.08
+
+smpl 2009 2015
+
+rus = 0.02
+
+smpl 2015 @last
+
+e_la = - 1.18
+
+smpl 2016 @last
+
+rus = 0.03
+
+smpl @all
+
+RER_mod.scenario "Scenario 1"
+
+' Set simulation sample
+smpl @first+2 @last
+
+' Solve the model for the current sample
+RER_mod.solve(i=p)
+
+' Store shocked value to scenario
+genr rus_1 = rus
+genr e_la_1 = e_la
+' and get back shocked value to baseline value
+rus = rus_0
+e_la = e_la_0
+
+smpl 1990 2100
+graph Grafico1.line _Yus_1 _Yla_1
+graph Grafico1a.line _Yus_1 
+graph Grafico1b.line _Yla_1
+graph Grafico2.line xrus_1*_pusy_1/_play_1 xrla_1*_play_1/_pusy_1
+
+graph Grafico2a.line xrus_1*_pusy_1/_play_1
+graph Grafico2b.line xrla_1*_play_1/_pusy_1 
+graph Grafico2c.line pxla_1/pmla_1
+graph Grafico2d.line pcba_1
+graph Grafico2e.line cba_s_1
+
+graph Grafico3.line  cabus_1/Yus_1 (Xus_1-IMus_1)/Yus_1 (Xla_1-IMla_1)/Yla_1 cabla_1/Yla_1
+graph Grafico3a.line Xla_1/Yla_1 IMla_1/Yla_1
+graph Grafico3b.line  cabla_1/Yla_1 (Xla_1-IMla_1)/Yla_1
+graph Grafico4a.line  -d(Bla_s_1)
+graph Grafico4b.line cabla_1/Yla_1 -d(Bla_s_1)/Yla_1 (cabla_1+d(Bla_s_1))/Yla_1
+graph Grafico5.line KABla_1/Yla_1 d(Bbusla_s_1)/Yla_1
+graph Grafico6.line ila_d_1
+graph GraficoIa.line _Cus_1
+graph GraficoIb.line _Cla_1/Yla_1
+graph GraficoIIa.line Bcusla_s_1/Bla_s_1
+graph GraficoIIb.line Bla_s_1/Yla_1
+graph GraficoIIIa.line _Vus_1
+graph GraficoIIIb.line _Vla_1/Yla_1
+
+graph Grafico_RW.line (wla_1)/_play_1   
+graph Grafico_WS.line (wla_1*nla_1)/yla_1 
+graph Grafico_ydec.line Cla_1 _YDlae_1   
+graph Grafico_n.line nla_1 
+
+graph Grafico_Inv.line ila_d_1 
+graph Grafico_ac.line ila_d_1/kla_1 
+graph Grafico_ky.line kla_1/yla_1
+graph Grafico_k.line kla_1  
+
+graph Grafico7.line (kla_1 - Bcusla_s_1)
+graph Grafico8.line yla_1/kla_t 
+graph Grafico9.line Fla_1/Bcusla_s_1  
+graph Grafico10.line Bcusla_s_1/kla_1    
+graph Grafico11.line (Wla_1*Nla_1+IMla_1)/_Sla_1    
+graph Grafico12.line Fla_1/kla_1
+graph Figure7.line Bcusla_s_1*xrla_1   
+ 
+ 
+graph Figure1.merge Grafico2b Grafico2c Grafico2d Grafico2e
+Figure1.axis(left) norm grid
+Figure1.options linepat -color
+Figure1.setelem lcolor(black) lpat(3)
+graph Figure2.merge Grafico3b Grafico3a
+Figure2.axis(left) norm grid 
+Figure2.options linepat -color
+Figure2.setelem lcolor(black)
+graph Figure3.merge Grafico4b Grafico4a GraficoIIb GraficoIIa 
+Figure3.axis(left) norm grid 
+Figure3.options linepat -color
+Figure3.setelem lcolor(black) lpat(3) 
+graph Figure4.merge Grafico_WS Grafico_RW Grafico_ydec Grafico_n
+Figure4.axis(left) norm grid 
+Figure4.options linepat -color
+Figure4.setelem lcolor(black)
+graph Figure5.merge Grafico_Inv Grafico_ac Grafico_ky Grafico_k 
+Figure5.axis(left) norm grid 
+Figure5.options linepat -color
+Figure5.setelem lcolor(black) 
+graph Figure6.merge  Grafico7 Grafico8 Grafico9 Grafico10 Grafico11 Grafico12 
+Figure6.axis(left) norm grid 
+Figure6.options linepat -color
+Figure6.setelem lcolor(black) lpat(3)
+Figure7.axis(left) norm grid 
+Figure7.options linepat -color
+Figure7.setelem lcolor(black)
+'Grafico3b Grafico4b Grafico5 Grafico6 GraficoIb GraficoIIb GraficoIIIb
+
+show Figure1 
+show Figure2
+show Figure3
+show Figure4
+show Figure5
+show Figure6
+show Figure7
+
+
+
+Figure1.save(t=png) Figure 1
+Figure2.save(t=png) Figure 2
+Figure3.save(t=png) Figure 3
+Figure4.save(t=png) Figure 4
+Figure5.save(t=png) Figure 5
+Figure6.save(t=png) Figure 6
+Figure7.save(t=png) Figure 7
+
+  exit
+```
+
+- Saving and including plots
+- For more info, see https://cran.r-project.org/web/packages/EviewsR/readme/README.html
+
+```{r, echo=FALSE}
+knitr::include_graphics("Figure 1.png")
+knitr::include_graphics("Figure 2.png")
+knitr::include_graphics("Figure 3.png")
+knitr::include_graphics("Figure 4.png")
+knitr::include_graphics("Figure 5.png")
+knitr::include_graphics("Figure 6.png")
+knitr::include_graphics("Figure 7.png")
+
+```
+
+# Step 3: The Model with "sfcr"
+
+- package to create, solve, validate SFC models (https://joaomacalos.github.io/sfcr/index.html);
+- includes several options for matrix visualization and flow diagrams;
+- the best way so far to translate Eviews models to R.
+
+## Sub-step 1: declare the model
+
+```{r, echo = T}
+#help("sfcr_set") #for help on this step (NOTE, SCROLL DOWN THE HELP PAGE TO FIND THE INDEX OF THE MANUAL OF THE PACKAGE)
+eqs <- sfcr_set(
+  #model creation,
+  #(1) arterial flows,
+  #income,
+  #yus~ cus+ gus +xus- imus,
+  #yla ~ cla+ gla+ xla -imla,
+  #disposable income,
+  ydus~(yus + fbus +rus[-1]*busus_d[-1]+ rdus[-1]*dus_d[-1] +cba_d[-1]+cgus+cgbus+cgcus)*(1-thetaus),
+  ydla~(yla + fbla + rla[-1]*blala_d[-1] + rdla[-1]*dla_d[-1]+der_d[-1]+cgla+cgbla+cgcla)*(1-thetala), 
+  #disposable income (hs),
+  #ydus_hs~ydus+ d(xrla)*busla_s[-1],
+  #ydla_hs~ydla+ d(xrus)*blaus_s[-1],
+  #wealth,
+  vus ~ vus[-1]+  ydus-cus,
+  vla ~ vla[-1]+ ydla-cla,
+  #capital gains,
+  cgus ~ (pcba-pcba[-1])*cba_s[-1],
+  cgla ~ (pder-pder[-1])*der_s[-1],
+  #tax,
+  tla ~ thetala*(yla+ fbla+rla[-1]*blala_d[-1]+ rdla[-1]*dla_d[-1]+der_d[-1]),
+  tus ~ thetaus*(yus+fbus +rus[-1]*busus_d[-1]+rdus[-1]*dus_d[-1] + cba_d[-1]) ,
+  #cb profits,
+  fcbla ~ rla[-1]*bcbla_d[-1] + rus[-1]*bcblaus_s[-1]*xrus,
+  fcbus ~ rus[-1]*bcbus_d[-1], 
+  #government budget constraint,
+  bla_s ~ bla_s[-1]+gla-tla+ rla[-1]*bla_s[-1] - fcbla+cgbus, 
+  bus_s ~ bus_s[-1]+gus-tus+ rus[-1]*bus_s[-1] - fcbus+cgbla,
+  #current and capital account,
+  cabla~xla - imla - rla[-1]*bbusla_s[-1] + rus[-1]*bblaus_s[-1]*xrus - rcusla[-1]*bcusla_s[-1] + rclaus[-1]*bclaus_s[-1]*xrus + rus[-1]*bcblaus_s[-1]*xrus ,
+  kabla ~ (bbusla_s-bbusla_s[-1]) +(bcusla_s-bcusla_s[-1]) - (bcblaus_s-bcblaus_s[-1])*xrus- (bblaus_s-bblaus_s[-1])*xrus - (bclaus_s-bclaus_s[-1])*xrus,
+  cabus~xus - imus + rla[-1]*bbusla_s[-1]*xrla - rus[-1]*bblaus_s[-1] + rcusla[-1]*bcusla_s[-1]*xrla - rclaus[-1]*bclaus_s[-1] - rus[-1]*bcblaus_s[-1],
+  #kabus ~ -d(bbla_s)*xrla + d(blaus_s) + d(bcblaus_s),
+  #(2) trade,
+  #export and import,
+  pmla~ exp(mi_0la+  mi_1la *log(r_pusy)  + (1- mi_1la)*log(r_play) - mi_1la *log(xrla)),
+  pxla ~exp(chi_0la+  chi_1la *log(r_pusy)  + (1- chi_1la)*log(r_play)- chi_1la *log(xrla)),
+  pxus ~ pmla*xrla,  
+  pmus ~ pxla*xrla,
+  r_xla~ exp(e_la - eta_la *log(pmus/r_pusy) + epsilon_la*log(r_yus)),
+  r_imla ~ exp(p_la - psi_la *log(pmla[-1]/r_play[-1]) + pi_la*log(r_yla)),
+  r_xus  ~r_imla,
+  r_imus~r_xla,
+  xla ~ r_xla*pxla,
+  xus ~ r_xus*pxus,
+  imla ~ r_imla*pmla,  
+  imus ~ r_imus*pmus,
+  #(3) income and expenditure,
+  #real disposable income is of the haig-simon type,
+  r_vla ~ vla/r_pdsla, 
+  r_vus~ vus/r_pdsus,
+  r_ydla ~ ydla/r_pdsla - r_vla[-1]* (r_pdsla-r_pdsla[-1])/r_pdsla ,
+  r_ydus ~ ydus/r_pdsus - r_vus[-1]* (r_pdsus-r_pdsus[-1])/r_pdsus ,
+  r_cla ~ alpha_1la*r_ydlae + alpha_2la*r_vla[-1],
+  r_cus ~alpha_1us*r_yduse + alpha_2us*r_vus[-1],
+  r_ydlae~ (r_ydla + r_ydla[-1])/2,
+  r_yduse~ (r_ydus + r_ydus[-1])/2,
+  r_sla ~r_cla+r_gla+r_xla ,
+  r_sus ~r_cus+r_gus+r_xus ,
+  sla ~r_sla*r_plas,
+  sus ~r_sus*r_puss,
+  r_plas ~((1+phila)*(wla*nla+imla+rcusla[-1]*bcusla_s[-1]*xrla)) /r_sla,
+  r_puss ~((1+phius)*(wus*nus+imus+rclaus[-1]*bclaus_s[-1]*xrus)) / r_sus,
+  r_pdsla ~(sla-xla) / (r_sla-r_xla),
+  r_pdsus ~(sus-xus) / (r_sus-r_xus),
+  dsla ~sla-xla ,
+  dsus ~sus-xus ,
+  r_dsla ~r_cla+r_gla ,
+  r_dsus ~r_cus+r_gus  ,
+  yla~sla-imla,
+  yus ~sus-imus,
+  r_yla ~r_sla-r_imla ,
+  r_yus ~r_sus-r_imus ,
+  r_play ~ yla /r_yla ,
+  r_pusy ~yus/ r_yus,
+  cla ~r_cla*r_pdsla ,
+  cus ~r_cus*r_pdsus  ,
+  gla ~r_gla*r_pdsla ,
+  gus ~r_gus*r_pdsus ,
+  nla_t ~ r_yla/ r_prla , 
+  nus_t ~ r_yus/ r_prus ,
+  #(4) financial intermediaries,
+  #us financial sector,
+  bbus_d~dus_s-bbusla_d-bcusla_d-hbus_d+pcba*cba_s+aus_d,
+  #d(vbus)~fbus,
+  bbusla_d~rho_2us*cba_s,
+  hbus_d~rho_0us*dus_s,
+  rdus~ rdus[-1] + rho_1us*(rus-rus[-1]),
+  cgbus ~ (xrla-xrla[-1])*bbusla_s[-1],
+  cgcus ~ (xrla-xrla[-1])*bcusla_s[-1],
+  pcba~(1/rcba)+log(pxla),
+  #d(rcba)~rho_0int*,
+  #d(rlus)~rho_2us*d(rus),
+  rcusla~(rho_3us+1)*rus,
+  fbus~rus[-1]*bbus_d[-1]-rdus*dus_s[-1]+rla[-1]*bbusla_d[-1]*xrla-cba_d[-1]+rcusla[-1]*bcusla_s[-1]*xrla,
+  #la financial sector,
+  bbla_d~dla_s-bblaus_d-bclaus_d-hbla_d+pder*der_s+ala_d,
+  #d(vbla)~fbla,
+  bblaus_d~rho_2la*der_s,
+  hbla_d~rho_0la*dla_s,
+  rdla ~ rdla[-1]+ rho_1la*(rla-rla[-1]),
+  cgbla ~ (xrus-xrus[-1])*bblaus_s[-1],
+  cgcla ~ (xrus-xrus[-1])*bclaus_s[-1],
+  pder~1/rder,
+  #d(rder)~-rho_2int*(rla-rus),
+  #d(rlla)~rho_2la*d(rla),
+  rclaus~(rho_3la+1)*rla,
+  fbla~rla[-1]*bbla_d[-1]-rdla*dla_s[-1]+rus[-1]*bblaus_d[-1]*xrus -der_d[-1]+rclaus[-1]*bclaus_s[-1]*xrus,
+  #intermediaries,
+  #d(vint)~rus[-1]*bintus_d[-1]+rla[-1]*bintla_d[-1]*xrla +cgint-rcba[-1]*cba_d[-1],
+  #cba_s~cba_d,
+  #cgint~d(xrla)*bintla_s[-1],
+  #pcba~1/rcba,
+  #d(rcba)~rho_0int*d(pxla)-rho_1int*(rla-rus),
+  #fint~rus[-1]*bintus_d[-1]+rla[-1]*bintla_d[-1]*xrla +cgint-rcba[-1]*cba_d[-1],
+  #bintla_d~cba_s-bintus_d,
+  #(5) assets demand,
+  #accumulation,
+  #US
+  # Wage bill
+  fus~ yus-wus*nus-rclaus[-1]*bclaus_s[-1]*xrus -daus-cgcla,
+  influs ~ r_pusy/r_pusy[-1]-1,
+  wus ~ omega0us + wus[-1]*(1+inflwus),
+  inflwus ~  thetapus*(influs[-1]),
+  phius ~ phi0us + phius[-1]*(1+inflphius),
+  inflphius ~  thetaphius*(influs[-1]),
+  nus ~ nus[-1] + etanus*(nus_t - nus[-1]),
+
+  # thetapus=nus/nus_t
+
+  # Fdus=rho_1int*Fus[-1]
+
+  # Fuus=Fus-Fdus
+
+  # Demand for bank loans
+  bclaus_s~ bclaus_s[-1]+ ius_d - daus-fus+cgcla,
+
+  # Accumuustion of capital
+  kus ~ kus[-1] + ius_d - daus,
+
+  # Depreciation allowances
+  daus ~ deltaus*kus[-1],
+
+  # Capital stock target 
+  kus_t ~ kappaus*yus[-1],
+
+  # Demand for investment goods
+  ius_d~gamma0us +  gammaus*(kus_t - kus[-1]) + daus,
+
+  #LA
+  # Wage bill
+  fla ~ yla -wla*nla - rcusla[-1]*bcusla_s[-1]*xrla-dala-cgcus,
+  inflla ~ r_play/r_play[-1]-1,
+  wla~omega0la + wla[-1]*(1+inflwla),
+  inflwla ~  thetapla*(inflla[-1]),
+  phila ~ phi0la + phila[-1]*(1+inflphila),
+  inflphila ~  thetaphila*(inflla[-1]),
+  nla ~ nla[-1] + etanla*(nla_t - nla[-1]),
+
+  # thetapla=nla/nla_t
+
+  # Fdla=rho_0int*Fla[-1]
+
+  # Fula=Fla-Fdla
+
+  # Demand for bank loans
+  bcusla_s~ bcusla_s[-1]+  ila_d- dala -fla+cgcus,
+
+  # Accumulation of capital
+  kla ~ kla[-1] + ila_d - dala,
+ 
+  # Depreciation allowances
+  dala ~ deltala*kla[-1],
+
+  # Capital stock target 
+  kla_t ~ kappala*yla[-1],
+
+  # Demand for investment goods
+  ila_d ~ gamma0la + gammala*(kla_t - kla[-1]) + dala,
+
+  #asset demand for la resident,
+  blala_d~vla*(lambda_10la+lambda_11la*rla-lambda_13la*rdla-lambda_14la*(rder+dxrlae)),
+  dla_d~vla*(lambda_40la-lambda_41la*rla+lambda_43la*rdla-lambda_44la*(rder+dxrlae)),
+  der_d~(vla/pder)*(lambda_50la-lambda_51la*rla-lambda_53la*rdla+lambda_54la*(rder+dxrlae)),
+  #blaus_d~vla*(lambda_20la-lambda_21la*rla-lambda_23la*rdla+lambda_22la*(rus+dxruse)),
+  #hla_d/ vla~lambda_30la - lambda_31la*(rus+dxruse) -lambda_32la*rla,
+  #asset demand for us resident,
+  busus_d~vus*(lambda_10us +lambda_11us*rus-lambda_13us*rdus-lambda_14us*(rcba+dxruse)),
+  dus_d~vus*(lambda_40us-lambda_41us*rus+lambda_43us*rdus-lambda_44us*(rcba+dxruse)),
+  cba_d~(vus/pcba)*(lambda_50us-lambda_51us*rus-lambda_53us*rdus+lambda_54us*(rcba+dxruse)),
+  #busla_d~vus*(lambda_20us -lambda_21us*rus+lambda_22us*(rla+dxrlae)),
+  #hus_d/ vus~lambda_30us -lambda_31us*rus -lambda_32us* (rla+dxrlae),
+  #asset demand for intermediaries,
+  #bintus_d~vint*(lambda_10int + lambda_11int*rus - lambda_12int*(rla+dxrlae)),
+  #bintla_d~vint*(lambda_20int - lambda_21int*rus + lambda_22int*(rla+dxrlae)),
+  #expected change in the exchange rate (expectations to update),
+  dxrlae~d(pder)/ pder,
+  dxruse~d(pcba)/ pcba,
+  #(6) assets supply,
+  #demand for cash,
+  hus_d~ vus - busus_d- dus_d- pcba*cba_d ,
+  hla_d~ vla - blala_d-dla_d -pder*der_d,
+  #cb demand for b, h; d and cba,
+  hus_s~ hus_d,
+  hla_s~ hla_d,
+  dus_s~dus_d,
+  dla_s~dla_d,
+  busus_s~ busus_d,
+  blala_s ~blala_d,
+  cba_s~cba_d,
+  der_s~der_d,
+  bbus_s~ bbus_d,
+  bbla_s ~bbla_d,
+  aus_s ~aus_d,
+  ala_s ~ala_d,
+  bcusla_d ~ bclaus_s*xrus,
+  bclaus_d ~ bcusla_s*xrla,
+  #bintus_s~bintus_d,
+  #lus_s~lus_d,
+  #lla_s~lla_d,
+  hbus_s~hbus_d,
+  hbla_s~hbla_d,
+  #supply of domestic t bills to cb,
+  bcbus_s~ bcbus_d,
+  bcbla_s~ bcbla_d,
+  bcbus_d ~ bcbus_d[-1]+ (hus_s-hus_s[-1])+(hbus_s-hbus_s[-1])-(aus_s -aus_s[-1]),
+  bcbla_d ~ bcbla_d[-1]+ (hla_s-hla_s[-1])+(hbla_s-hbla_s[-1])-(bcblaus_s-bcblaus_s[-1])*xrus-(ala_s -ala_s[-1]),
+  #supply of assets abroad ,
+  #busla_s~ bla_s- blala_s- bcbla_s,
+  #exchange rate,
+  #xrus~ blaus_d /blaus_s,
+  xrla ~ 1/xrus,
+  bblaus_s ~ bblaus_d*xrla,
+  bcblaus_d ~ bcblaus_s*xrus,
+  xrus ~ (bbusla_s)/(bbusla_d),
+  bbusla_s ~ bla_s - blala_s- bcbla_s - bbla_s,
+  #final equation (not possible to appear twice),
+  #blaus_s~ blaus_d /xrus,
+  rerla~(r_play/r_pusy)*(xrla),
+  rerus~1/rerla,
+  tbla~xla - imla,
+  tbus~xus - imus,
+  psbrla~d(bla_s),
+  psbrus~d(bus_s),
+  prbla~cabla+d(bla_s),
+  prbus~cabus+d(bus_s),
+  nwla~((vla)-(bla_s) +(bbla_d-dla_s+bblaus_d+hbla_d-pder*der_s)+(bcblaus_d+bcbla_d-hla_s)),
+  nwus~((vus)-(bus_s) +(bbus_d-dus_s+bbusla_d+hbus_d-pcba*cba_s)+(bcbus_d-hus_s)),
+  rsh_cla~r_cla/yla,
+  sh_cabla~cabla/yla,
+  sh_tbla~tbla/yla,
+  sh_govdef~-psbrla/yla,
+  sh_prbla~prbla/yla,
+  nip~rla[-1]*bla_s[-1]/yla,
+  govdeb~bla_s/yla,
+  sh_bbusla_s~bbusla_s/bla_s,
+  sh_cba~pcba*cba_d/r_vus,
+  totla~pxla/pmla,
+  nwtla~kla-bcusla_s,
+  ucsla~(wla*nla+imla)/r_sla
+)
+
+```
+
+## Sub-step 2: declare the exogenous and endogenous variables and name the model
+
+```{r, echo = T}
+
+external <- sfcr_set(
+  alpha_1la ~ 0.9,
+  alpha_1us ~ 0.6,
+  alpha_2la ~  0.053333276,
+  alpha_2us ~  0.213326723889398,
+  #vertical and horizontal constraints respected
+  lambda_10la ~ 0.4,
+  lambda_11la ~ 0.5,
+  lambda_12la ~ 0.5,
+  lambda_13la~ 0.25,
+  lambda_14la~ 0.25,
+  lambda_20la ~ 0.3,
+  lambda_21la ~ 0.5,
+  lambda_22la ~ 0.5,
+  lambda_23la~ 0.5,
+  lambda_40la ~ 0.4,
+  lambda_41la ~ 0.25,
+  lambda_42la ~ 5,
+  lambda_43la~ 0.5,
+  lambda_44la~ 0.25,
+  lambda_50la ~ 0.1,
+  lambda_51la ~ 0.25,
+  lambda_52la ~ 5,
+  lambda_53la~ 0.25,
+  lambda_54la~ 0.5,
+  #vertical and horizontal constraints respected
+  lambda_24la~ 5,
+  lambda_30la ~ 0.25,
+  lambda_31la ~ 5,
+  lambda_32la ~ 5,
+  lambda_33la~ 5,
+  lambda_34la~ 5,
+  #vertical and horizontal constraints respected
+  lambda_10us ~ 0.4,
+  lambda_11us ~ 0.5,
+  lambda_12us ~ 0.5,
+  lambda_13us~ 0.25,
+  lambda_14us~ 0.25,
+  lambda_20us ~ 0.3,
+  lambda_21us ~ 0.5,
+  lambda_22us ~ 0.5,
+  lambda_23us~ 0.5,
+  lambda_40us ~ 0.4,
+  lambda_41us ~ 0.25,
+  lambda_42us ~ 5,
+  lambda_43us~ 0.5,
+  lambda_44us~ 0.25,
+  lambda_50us ~ 0.1,
+  lambda_51us ~ 0.25,
+  lambda_52us ~ 5,
+  lambda_53us~ 0.25,
+  lambda_54us~ 0.5,
+  #vertical and horizontal constraints respected
+  lambda_24us~ 5,
+  lambda_30us ~ 0.25,
+  lambda_31us ~ 5,
+  lambda_32us ~ 5,
+  lambda_33us~ 5,
+  lambda_34us~ 5,
+  #vertical and horizontal constraints respected
+  lambda_60us~0.5,
+  lambda_61us~0.5,
+  lambda_62us~0.5,
+  lambda_70us~0.5,
+  lambda_71us~0.5,
+  lambda_72us~0.5,
+  lambda_60la~0.5,
+  lambda_61la~0.5,
+  lambda_62la~0.5,
+  lambda_70la~0.5,
+  lambda_71la~0.5,
+  lambda_72la~0.5,
+  #vertical and horizontal constraints respected
+  e_la ~  - 1.18,
+  eta_la ~ 0.7,
+  epsilon_la ~ 0.8,
+  p_la ~ - 3.015,
+  psi_la ~ 0.7,
+  pi_la ~  1.2,
+  mi_0la ~ - 0.00001,
+  chi_0la ~ - 0.00001,
+  mi_1la ~ 0.6,
+  chi_1la ~ 0.55,
+  thetala ~ 0.2,
+  thetaus ~ 0.2,
+  thetabla ~ 0,
+  thetabus ~ 0,
+  rho_0us~0.03,
+  rho_1us~0.9,
+  rho_2us~2.7,
+  rho_3us~0.03,
+  rho_0la~0.03,
+  rho_1la~0.9,
+  rho_2la~2.7,
+  rho_3la~0.03,
+  rho_0int~0.9,
+  rho_1int~0.9,
+  rho_2int~0.9,
+  deltala ~ 0.2158,
+  gammala ~ 1,
+  gamma0la ~ 0,
+  kappala~1,
+  deltaus ~ 0.2158,
+  gammaus ~ 1,
+  gamma0us ~ 0,
+  kappaus ~ 1,
+  aus_d ~ 0,
+  ala_d ~ 0,
+  
+  # exogenous variables
+  bcblaus_s ~ 0.02031,
+  r_gla ~ 16,
+  r_gus ~ 16,
+  r_prla ~ 0.8,
+  r_prus ~ 1.3333,
+  rla ~ 0.03,
+  rus ~ 0.03,
+  rcba~0.16,
+  rder~0.16,
+  thetapla ~ 0,
+  thetapus ~ 0,
+  omega0la ~ 0,
+  omega0us ~ 0,
+  thetaphius ~ 0,
+  thetaphila ~ 0,
+  phi0la ~ 0,
+  phi0us ~ 0,
+  etanla ~ 1,
+  etanus ~ 1
+
+)
+
+
+
+initial <- sfcr_set(
+  # starting values for stocks
+  bcblaus_d ~ 0.02031,
+  bla_s ~ 145.954295,
+  blala_d ~ 102.18,
+  blala_s ~ 102.18,
+  bbus_d ~ 13.250255,
+  bbus_s ~ 13.250255,
+  bus_s ~ 146.005715,
+  busus_d ~ 102.19,
+  busus_s ~ 102.19,
+  bcbla_d ~ 17.27839,
+  bcbla_s ~ 17.27839,
+  bcbus_d ~ 17.2995,
+  bcbus_s ~ 17.2995,
+  hla_d ~ 7.2987,
+  hla_s ~ 7.2987,
+  hus_d ~ 7.2995,
+  hus_s ~ 7.2995,
+  bblaus_d ~ 13.24565,
+  bblaus_s ~ 13.24565,
+  bbusla_d ~ 13.250255,
+  bbusla_s ~ 13.250255,
+  cba_d ~ 3.9178,
+  cba_s ~ 3.9178,
+  der_d ~ 3.9178,
+  der_s ~ 3.9178,
+  bbla_d ~ 13.24565,
+  bbla_s ~ 13.24565,
+  hbus_d~10,
+  hbus_s~10,
+  hbla_d~10,
+  hbla_s~10,
+  dus_s~12.01426,
+  dla_s~12.01426,
+  dus_d~12.01426,
+  dla_d~12.01426,
+  aus_s ~ 0,
+  ala_s ~ 0,
+  r_vla ~ 152.62,
+  r_vus ~ 152.63,
+  vla ~ 145.97921,
+  vus ~ 145.99001,
+  ila_d ~ 20,
+  ius_d ~ 20,
+  kla_t ~ 91,
+  kus_t ~ 91,
+  bcusla_d ~ 2.5,
+  bcusla_s ~ 2.5,
+  kla ~ 91,
+  dala ~ 20,
+  bclaus_d ~ 2.5,
+  bclaus_s ~ 2.5,
+  kus ~ 91,
+  daus ~ 20,
+
+  # other endogenous
+  r_cla ~ 81.393,
+  r_cus ~ 81.401,
+  cabla ~ 0,
+  cabus ~ 0,
+  cla ~ 77.851,
+  cus ~ 77.86,
+  r_dsla ~ 97.393,
+  r_dsus ~ 97.401,
+  dsla ~ 93.154,
+  dsus ~ 93.164,
+  #dxrlae ~ 0,
+  fcbla ~ 0.00869,
+  fcbus ~ 0.00895,
+  fbus~0.6,
+  fbla~0.8,
+  gla ~ 15.304,
+  gus ~ 15.304,
+  r_imla ~ 11.928,
+  r_imus ~ 11.926,
+  imla ~ 11.407,
+  imus ~ 11.409,
+  kabla ~ 0.00002,
+  #kabus ~ - 0.00002,
+  nla ~ 73.046,
+  nus ~ 73.054,
+  nla_t ~ 73.046, 
+  nus_t ~ 73.054,
+  r_pdsus ~ 0.95648,
+  r_pdsla ~ 0.95649,
+  pmla ~ 0.95628,
+  pmus ~ 0.95661,
+  r_plas ~ 0.95646,
+  r_puss ~ 0.9565,
+  pxla ~ 0.95634,
+  pxus ~ 0.95656,
+  r_play ~ 0.95648,
+  r_pusy ~ 0.95649,
+  r_sla ~ 109.32,
+  r_sus ~ 109.33,
+  sla ~ 104.56,
+  sus ~ 104.57,
+  tla ~ 19.463,
+  tus ~ 19.465,
+  r_xla ~ 11.926,
+  r_xus ~ 11.928,
+  xla ~ 11.406,
+  xus ~ 11.41,
+  xrla ~ 1.0003,
+  xrus ~ 0.99971,
+  #xrlae ~ 1.0003,
+  #xruse ~ 0.99971,
+  r_yla ~ 97.392,
+  r_yus ~ 97.403,
+  yla ~ 93.154,
+  yus ~ 93.164,
+  ydla ~ 77.851,
+  ydus ~ 77.86,
+  r_ydla ~ 81.394,
+  r_ydus ~ 81.402,
+  r_ydlae ~ 81.394,
+  r_yduse ~ 81.402,
+  phila ~ 0.2381,
+  phius ~ 0.2381,
+  rerus~0,
+  rerla~0,
+  rdus~0.01,
+  rdla~0.01,
+  rcusla~0.0315,
+  rclaus~0.0315,
+  pcba~ 6.25,
+  pder~ 6.25,
+  dxrlae~0,
+  dxruse~0,
+  tbla~0,
+  tbus~0,
+  psbrla~0,
+  psbrus~0,
+  prbla~0,
+  prbus~0,
+  nwla~0,
+  nwus~0,
+  rsh_cla~0,
+  sh_cabla~0,
+  sh_tbla~0,
+  sh_govdef~0,
+  sh_prbla~0,
+  nip~0,
+  govdeb~0,
+  sh_bbusla_s~0,
+  sh_cba~0,
+  totla~0,
+  inflwla ~ 0,
+  inflla ~ 0,
+  inflwus ~ 0,
+  influs ~ 0,
+  inflphila ~ 0,
+  inflphius~ 0,
+  wla ~ 0.6,
+  wus ~ 1,
+  fla ~ 0,
+  fus ~ 0,
+  cgus~ 0,
+  cgbus~ 0,
+  cgcus~ 0,
+  cgla~ 0,
+  cgbla~ 0,
+  cgcla~ 0
+
+)
+
+rer <- sfcr_baseline(
+  equations = eqs, 
+  external = external,
+  initial=initial,
+  periods = 200,
+  max_iter = 5000,
+
+  
+)
+
+#cba
+
+```
+
+## Sub-step 3: shocks and graphs
+
+```{r, echo = T}
+#help("sfcr_shock")
+#EXPORT SHOCK
+shock1 <- sfcr_shock(
+  variables = sfcr_set(
+    e_la ~ - 1.08
+  ),
+  start = 100,
+  end = 112
+  
+)
+
+shock2 <- sfcr_shock(
+  variables = sfcr_set(
+    rus ~ 0.02
+  ),
+  start = 106,
+  end = 113
+  
+)
+
+shock3 <- sfcr_shock(
+  variables = sfcr_set(
+    e_la ~ - 1.18
+  ),
+  start = 112,
+  end = 200
+  
+)
+
+shock4 <- sfcr_shock(
+  variables = sfcr_set(
+    rus ~ 0.03
+  ),
+  start = 113,
+  end = 200
+  
+)
+
+scenario1 <- sfcr_scenario(
+  baseline = rer,
+  scenario = list(shock1, shock2, shock3, shock4),
+  periods = 200
+)
+
+# Figure 1. Responses from RER, CBA, TOT
+
+p1 <- scenario1 %>%
+  ggplot( aes(x=period, y=((rerla-mean(rerla))/sd(rerla)))) +
+  geom_line( aes(linetype="RER"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p2 <- scenario1 %>%
+  ggplot( aes(x=period, y=((totla-mean(totla))/sd(totla)))) +
+  geom_line( aes(linetype="TOT"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p3 <- scenario1 %>%
+  ggplot( aes(x=period, y=((pcba-mean(pcba))/sd(pcba)))) +
+  geom_line( aes(linetype="Price of CLN"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+  
+
+p4 <- scenario1 %>%
+  ggplot( aes(x=period, y=((cba_s-mean(cba_s))/sd(cba_s)))) +
+  geom_line( aes(linetype="Stock of CLN"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+grid.arrange(p1, p2, p3, p4, nrow = 2)
+
+# Figure 2. Exports, Imports, Trade Balance, and Current Account
+
+p5 <- scenario1 %>%
+  ggplot( aes(x=period, y=((cabla-mean(cabla))/sd(cabla)))) +
+  geom_line(aes(linetype="CAB % GDP Mexico")) +
+  geom_line(aes(x=period, y=((tbla-mean(tbla))/sd(tbla)), linetype="TAB % GDP Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("twodash", "dotted"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)+ 
+  coord_cartesian(ylim=c(-8, 8))
+p6 <- scenario1 %>%
+  ggplot( aes(x=period, y=((xla/yla-mean(xla/yla))/sd(xla/yla)))) +
+  geom_line(aes(linetype="Exports % GDP Mexico"))+
+  geom_line(aes(x=period, y=((imla/yla-mean(imla/yla))/sd(imla/yla)), linetype="Imports % GDP Mexico")) +
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("longdash", "dotdash"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)+ 
+  coord_cartesian(ylim=c(-8, 8))
+
+grid.arrange(p5, p6, nrow = 1)
+
+# Figure 3. Exports, Imports, Trade Balance, and Current Account
+
+p7 <- scenario1 %>%
+  ggplot( aes(x=period, y=((sh_cabla-mean(sh_cabla))/sd(sh_cabla)))) +
+  geom_line(aes(linetype="CAB % GDP Mexico")) +
+  geom_line(aes(x=period, y=((sh_govdef-mean(sh_govdef))/sd(sh_govdef)), linetype="GB % GDP Mexico")) +
+  geom_line(aes(x=period, y=((sh_prbla-mean(sh_prbla))/sd(sh_prbla)), linetype="PSB % GDP Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("longdash", "dotdash", "solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p8 <- scenario1 %>%
+  ggplot( aes(x=period, y=((sh_govdef-mean(sh_govdef))/sd(sh_govdef)))) +
+  geom_line( aes(linetype="GB % GDP Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p9 <- scenario1 %>%
+  ggplot( aes(x=period, y=((govdeb-mean(govdeb))/sd(govdeb)))) +
+  geom_line( aes(linetype="Debt % GDP Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p10 <- scenario1 %>%
+  ggplot( aes(x=period, y=((bcusla_s/bla_s-mean(bcusla_s/bla_s))/sd(bcusla_s/bla_s)))) +
+  geom_line( aes(linetype="Corporate vs Public Debt Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+grid.arrange(p7, p8, p9, p10, nrow = 2)
+
+# Figure 4. Real Wages, Employment, Disposable Income, Consumption, and Wage Share
+
+p11 <- scenario1 %>%
+  ggplot( aes(x=period, y=((wla*nla/yla-mean(wla*nla/yla))/sd(wla*nla/yla)))) +
+  geom_line( aes(linetype="Wage Share Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p12 <- scenario1 %>%
+  ggplot( aes(x=period, y=((wla/r_yla-mean(wla/r_yla))/sd(wla/r_yla)))) +
+  geom_line( aes(linetype="Real Wages Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p13 <- scenario1 %>%
+  ggplot( aes(x=period, y=((r_ydlae-mean(r_ydlae))/sd(r_ydlae)))) +
+  geom_line( aes(linetype="Expected real Output Mexico"))+
+  geom_line(aes(x=period, y=((cla-mean(cla))/sd(cla)), linetype="Consumption Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("longdash", "dotdash"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p14 <- scenario1 %>%
+  ggplot( aes(x=period, y=((nla-mean(nla))/sd(nla)))) +
+  geom_line( aes(linetype="Employment Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+grid.arrange(p11, p12, p13, p14, nrow = 2)
+
+# 42 Figure 5. Investment Flows, Capital Accumulation, and Capital Stock 
+
+p15 <- scenario1 %>%
+  ggplot( aes(x=period, y=((ila_d-mean(ila_d))/sd(ila_d)))) +
+ geom_line( aes(linetype="Investment Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+p16 <- scenario1 %>%
+  ggplot( aes(x=period, y=((ila_d/kla-mean(ila_d/kla))/sd(ila_d/kla)))) +
+  geom_line( aes(linetype="Capital Accumulation Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p17 <- scenario1 %>%
+  ggplot( aes(x=period, y=((kla/yla-mean(kla/yla))/sd(kla/yla)))) +
+  geom_line( aes(linetype="Capital Output Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p18 <- scenario1 %>%
+  ggplot( aes(x=period, y=((kla-mean(kla))/sd(kla)))) +
+  geom_line( aes(linetype="Capital Stock Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+grid.arrange(p15, p16, p17, p18, nrow = 2)
+
+# Figure 6. Additional Investment Indicators 
+
+p19 <- scenario1 %>%
+  ggplot( aes(x=period, y=((nwtla-mean(nwtla))/sd(nwtla)))) +
+  geom_line( aes(linetype="Net Wealth Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+p20 <- scenario1 %>%
+  ggplot( aes(x=period, y=((yla/kla_t-mean(yla/kla_t))/sd(yla/kla_t)))) +
+  geom_line( aes(linetype="Capacity Utilization Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p21 <- scenario1 %>%
+  ggplot( aes(x=period, y=((fla/bcusla_s-mean(fla/bcusla_s))/sd(fla/bcusla_s)))) +
+  geom_line( aes(linetype="Profit over Debt Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p22 <- scenario1 %>%
+  ggplot( aes(x=period, y=((bcusla_s/kla-mean(bcusla_s/kla))/sd(bcusla_s/kla)))) +
+  geom_line( aes(linetype="Debt over Capital Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p23 <- scenario1 %>%
+  ggplot( aes(x=period, y=((ucsla-mean(ucsla))/sd(ucsla)))) +
+  geom_line( aes(linetype="Unit Labour Costs Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p24 <- scenario1 %>%
+  ggplot( aes(x=period, y=((fla/kla-mean(fla/kla))/sd(fla/kla)))) +
+  geom_line( aes(linetype="Profit over Capital Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+grid.arrange(p19, p20, p21, p22, p23, p24, nrow = 3)
+
+# Figure 7. Corporate Sector’s Stock of Debt  
+
+p25 <- scenario1 %>%
+  ggplot( aes(x=period, y=((bcusla_s*xrla-mean(bcusla_s*xrla))/sd(bcusla_s*xrla)))) +
+  geom_line( aes(linetype="Balance Sheet Effect Mexico"))+
+  theme(axis.title.x=element_blank())+
+  theme(axis.title.y=element_blank()) +
+  scale_linetype_manual(values=c("solid"))+ 
+  theme(legend.position="bottom") + 
+  theme(legend.title = element_blank())+
+  guides(colour = guide_legend(nrow = 2))+
+  xlim(90, 200)
+
+p25
+
+  
+```
+
+
+## Sub-step 4: DAGs, matrixes and sankey
+
+```{r, echo=T}
+# To replicate the Table 1
+
+bs <- sfcr_matrix(
+  columns = c("Households MX", "Firms MX", "Financial Sector MX", "Government MX", "Central bank MX", "FX", "Households RoW", "Firms RoW", "Financial Sector RoW", "Government RoW", "Central bank RoW", "sum"),
+  codes = c("hMX", "fMX", "bMX", "gMX", "cbMX", "xr", "hRoW", "fRoW", "bRoW", "gRoW", "cbRoW", "s"),
+  r1 = c("Deposits", hMX = "+D", bMX = "-D", xr = "xr", hRoW = "+D", bRoW = "-D", s = "0"),
+  r2 = c("Bills MX", hMX = "+B_hMXMX", bMX = "+B_bMXMX", gMX = "-B_MX", cbMX = "+B_cbMX", xr = "xr", bRoW = "+B_hRoWMX", s = "0"),
+  r3 = c("Bills RoW", bMX = "+B_bMXRoW", cbMX = "+B_cbMXRoW", xr = "xr", hRoW = "+B_hRoWRoW", bRoW = "+B_bRoWRoW", gRoW = "-B_RoW", cbRoW = "+B_cbRoW", s = "0"),
+  r4 = c("Corporate Bills MX", bMX = "+B_cMXRoW", xr = "xr", fRoW = "-B_cMXRoW", s = "0"),
+  r5 = c("Corporate Bills RoW", fMX = "-B_cRoWMX", xr = "xr", bRoW = "+B_cMXRoW", s = "0"),
+  r6 = c("Derivatives", hMX = "+pDER", bMX = "-pDER", xr = "xr", s = "0"),
+  r7 = c("CLNs", xr = "xr", hRoW = "+pCLN", bRoW = "-pCLN", s = "0"),
+  r8 = c("Capital", fMX = "+KMX", xr = "xr", fRoW = "+KRoW", s = "K"),
+  r9 = c("HPM", hMX = "+H_h", bMX = "+H_b", cbMX = "-H", xr = "xr", hRoW = "+H_h", bRoW = "+H_b", cbRoW = "-H", s = "0"),
+  r10 = c("Balance", hMX = "-V", bMX = "0", gMX = "-NW_g",  cbMX = "-NW_cb", hRoW = "-V", bRoW = "0", gRoW = "-NW_g",  cbRoW = "-NW_cb", s = "K")
+)
+
+sfcr_matrix_display(bs, "bs")
+
+
+# To replicate the Table 2
+
+tfm <- sfcr_matrix(
+  columns = c("Households MX", "Firms MX", "Financial Sector MX", "Government MX", "Central bank MX", "Households RoW", "Firms RoW", "Financial Sector RoW", "Government RoW", "Central bank RoW"),
+  codes = c("hMX", "fMX", "bMX", "gMX", "cbMX", "hRoW", "fRoW", "bRoW", "gRoW", "cbRoW"),
+  c("Exports", fMX = "+xla", fRoW = "-imus"),
+  c("Imports", fMX = "-imla", fRoW = "+xus"),
+  c("Consumption MX", hMX = "-cla", fMX = "+cla"),
+  c("Govt. Expenditures MX", hMX = "+gla", gMX = "-gla"),
+  c("Investment MX", fMX = "+ila_d", fMX = "-ila_d"),
+  c("Firms Profit MX", fMX = "-fla", fMX = "+fla"),
+  c("Taxes MX", hMX = "-tla", gMX = "+tla"),
+  c("Income MX", hMX = "+yla", fMX = "-yla"),
+  c("Banks Profits MX", hMX = "+fbla", bMX = "-fbla"),
+  c("CB Profits MX", gMX = "+fcbla", cbMX = "-fcbla"),
+  c("Consumption RoW",  hRoW = "-cus", fRoW = "+cus"),
+  c("Govt. Expenditures RoW",  hRoW = "+gus", gRoW = "-gus"),
+  c("Investment RoW", fRoW = "+ius_d", fRoW = "-ius_d"),
+  c("Firms Profit RoW", fRoW = "-fus", fRoW = "+fus"),
+  c("Taxes RoW",  fRoW = "-tus", gRoW = "+tus"),
+  c("Income RoW",  hRoW = "+yus", fRoW = "-yus"),
+  c("Banks Profits RoW",  hRoW = "+fbus", bRoW = "-fbus"),
+  c("CB Profits RoW",  gRoW = "+fcbus", cbRoW = "-fcbus"),
+  c("Int. Deposits MX", hMX = "+rdla[-1]*dla_d[-1]", bMX = "-rdla[-1]*dla_d[-1]"),
+  c("Int. Bills MX", hMX = "+rla[-1]*blala_d[-1]", bMX = "+rla[-1]*bbla_d[-1]", gMX = "-rla[-1]*bla_s[-1]", cbMX = "+rla[-1]*bcbla_d[-1]", bRoW = "+rla[-1]*bbusla_d[-1]"),
+  c("Int. Corporate Bills MX", fMX = "-rcusla[-1]*bcusla_d[-1]", bRoW = "+rcusla[-1]*bcusla_d[-1]"),
+  c("Int. Derivatives", hMX = "+rder[-1]*der_d[-1]", bMX = "-rder[-1]*der_d[-1]"),
+  c("Int. Deposits RoW", hRoW = "+rdus[-1]*dus_d[-1]", bRoW = "-rdus[-1]*dus_d[-1]"),
+  c("Int. Bills RoW", bMX = "+rus[-1]*bblaus_d[-1]", cbMX = "+rus[-1]*bcblaus_d[-1]", hRoW = "+rus[-1]*busus_d[-1]", bRoW = "+rus[-1]*bbus_d[-1]", gRoW = "-rus[-1]*bus_s[-1]", cbRoW = "+rus[-1]*bcbus_d[-1]"),
+  c("Int. Corporate Bills RoW", fRoW = "-rclaus[-1]*bclaus_d[-1]", bMX = "+rclaus[-1]*bclaus_d[-1]"),
+  c("Int. CLNs", hRoW = "+rcba[-1]*cba_d[-1]", bRoW = "-rcba[-1]*cba_d[-1]"),
+  c("Ch. Deposits MX", hMX = "-(dla_s-dla_s[-1])", bMX = "+(dla_s-dla_s[-1])"),
+  c("Ch. Bills MX", hMX = "-(blala_s-blala_s[-1])", bMX = "-(bbla_s-bbla_s[-1])", gMX = "+(bla_s-bla_s[-1])", cbMX = "-(bcbla_s-bcbla_s[-1])", bRoW = "-(bbusla_s-bbusla_s[-1])"),
+  c("Ch. Corporate Bills MX", bRoW = "-(bcusla_s-bcusla_s[-1])", fMX = "+(bcusla_s-bcusla_s[-1])"),
+  c("Ch. Derivatives", hMX = "-(pder*der_s-pder[-1]*der_s[-1])", bMX = "+(pder*der_s-pder[-1]*der_s[-1])" ),
+  c("Ch. HPM MX", hMX = "-(hla_s-hla_s[-1])", bMX = "-(hbla_s-hbla_s[-1])", cbMX = "+(hla_s-hla_s[-1])+(hbla_s-hbla_s[-1])"),
+  c("Ch. Deposits RoW",  hRoW = "-(dus_s-dus_s[-1])", bRoW = "+(dus_s-dus_s[-1])"),
+  c("Ch. Bills RoW", bMX = "-(bblaus_s-bblaus_s[-1])", cbMX = "-(bcblaus_s-bcblaus_s[-1])", hRoW = "-(busus_s-busus_s[-1])", bRoW = "-(bbus_s-bbus_s[-1])", gRoW = "+(bus_s-bus_s[-1])", cbRoW = "-(bcbus_s-bcbus_s[-1])"),
+  c("Ch. Corporate Bills RoW", bRoW = "-(bclaus_s-bclaus_s[-1])", fMX = "+(bclaus_s-bclaus_s[-1])"),
+  c("Ch. CLNs", hRoW = "-(pcba*cba_s-pcba[-1]*cba_s[-1])", bRoW = "+(pcba*cba_s-pcba[-1]*cba_s[-1])"),
+  c("Ch. HPM RoW", hRoW = "-(hus_s-hus_s[-1])", bRoW = "-(hbus_s-hbus_s[-1])", cbRoW = "+(hus_s-hus_s[-1])+(hbus_s-hbus_s[-1])"),
+)
+
+sfcr_matrix_display(tfm, "tfm")
+
+sfcr_dag_blocks(eqs)
+sfcr_dag_blocks_plot(eqs, title = NULL, size = 10)
+
+ex<-sfcr_dag_cycles(eqs)
+fex<-sfcr_dag_cycles_plot(eqs, title = NULL, size = 10)
+
+sfcr_sankey(tfm, rer, when = "start")
+
+```
+
+
+
+
+
